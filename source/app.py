@@ -49,11 +49,13 @@ def message(payload):
 
     
     if text and text.lower().startswith("ranger"):
-        post(channel_id, "Fetching your AWS instance...")
-        report = Ranger.ranger(init=True, region="eu-west-1", table=True, execute=False)
+        post(channel_id, "Fetching your AWS report...")
         if text.lower() == "ranger init":
-            # post(channel_id, report)
-            post_file(channel_id, "demofile2.txt")
+            report = Ranger.ranger(init=True, region="eu-west-1", table=True, execute=False)
+            post_file(channel_id, "report_output.txt")
+        elif test.lower() == "ranger bill":
+            report = Ranger.bill()
+            post_file(channel_id, "report_output.txt")
         else:
             post(channel_id, "Command not found")
         pass

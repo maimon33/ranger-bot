@@ -2,9 +2,11 @@ import re
 import os
 import sys
 import json
+import queue
 import socket
 import difflib
 import getpass
+import threading
 import time as Time
 
 import smtplib
@@ -33,6 +35,16 @@ except (urllib.error.URLError, socket.timeout):
 
 AWS_RANGER_HOME = '{0}/.ranger'.format(USER_HOME)
 BOTO_CREDENTIALS = '{0}/.aws/credentials'.format(USER_HOME)
+
+
+def run_func_in_threads(thread_func, list_of_args=None):
+    queue_res = queue.Queue()
+    list_of_args.append(queue_res)
+    t = threading.Thread(target=thread_func, args=tuple(list_of_args))
+    t.start()
+    t.join()
+    result = queue_res.get()
+    return result
 
 def find_profiles(file=None):
     if not file:
@@ -318,6 +330,26 @@ class AWSRanger(object):
             Filters=[{'Name': 'instance-state-name', 
                       'Values': instance_state}])
 
+    def get_bill(self, year, month, last_day_in_month):
+        if len(str(month)) < 2:
+            month = f'0{month}'
+        response = self.aws_client(
+            resource=False, 
+            region_name='us-east-1', 
+            aws_service='ce').get_cost_and_usage(
+                TimePeriod={'Start': f'{year}-{month}-01','End': f'{year}-{month}-{last_day_in_month}'},
+                Granularity='MONTHLY', Metrics=['AmortizedCost'])
+        cost = response['ResultsByTime'][0]['Total']['AmortizedCost']['Amount']
+        cost = utils.truncate(float(cost), 2)
+        date = f'{month}/{year}'
+        bill = f'{cost} $'
+        return date, bill
+
+    def get_bill_by_month(self, current_month=True, queue=None):
+        year, month, last_day_in_month = utils.get_current_date(current=current_month)
+        date, bill = self.get_bill(year=year, month=month, last_day_in_month=last_day_in_month)
+        queue.put((date, bill))
+    
     def get_instances(self,
                       instances_state=["running", "stopped"],
                       region=False):
@@ -497,11 +529,26 @@ def ranger(init, region, table, execute):
             else:
                 print("Region has no instance")
         # return x
-        with open('demofile2.txt', 'w') as w:
+        with open('report_output.txt', 'w') as w:
             w.write(str(x))
         return
     else:
         print(utils._format_json(instances))
+
+def bill():
+    DEFAULT_AWS_PROFILE = find_profiles(BOTO_CREDENTIALS)[0]
+    ranger = AWSRanger(profile_name=DEFAULT_AWS_PROFILE)
+
+    lastdate, lastbill = run_func_in_threads(thread_func=ranger.get_bill_by_month, list_of_args=[False])
+    currentdate, currentbill = run_func_in_threads(thread_func=ranger.get_bill_by_month,  list_of_args=[True])
+    REPORT_OUTPUT="""
+Cost for {}: {}
+Cost for {}: {}
+""".format(lastdate, lastbill, currentdate, currentbill)
+    with open('report_output.txt', 'w') as w:
+        w.write(str(x))
+    return
+
 
 if __name__ == "__main__":
     ranger()
