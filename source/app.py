@@ -53,8 +53,18 @@ def message(payload):
     if text and text.lower().startswith("ranger"):
         try:
             if event["ts"] not in reports_sent[channel_id][user_id]:
-                pass
+                post(channel_id, "Fetching your AWS report...")
+                if text.lower() == "ranger init":
+                    report = Ranger.ranger(init=True, region="eu-west-1", table=True, execute=False)
+                    post_file(channel_id, "report_output.txt")
+                elif text.lower() == "ranger bill":
+                    report = Ranger.bill()
+                    post_file(channel_id, "report_output.txt")
+                else:
+                    post(channel_id, "Command not found")
+                reports_sent[channel_id][user_id] = event["ts"]
         except KeyError:
+            reports_sent[channel_id] = {}
             post(channel_id, "Fetching your AWS report...")
             if text.lower() == "ranger init":
                 report = Ranger.ranger(init=True, region="eu-west-1", table=True, execute=False)
