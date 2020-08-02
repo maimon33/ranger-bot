@@ -53,7 +53,7 @@ def message(payload):
 
     
     if text and text.lower().startswith("ranger"):
-        if channel_id not in reports_sent[channel_id]:
+        if channel_id not in reports_sent:
             post(channel_id, "Fetching your AWS report...")
             reports_sent[channel_id] = {}
             if text.lower() == "ranger init":
