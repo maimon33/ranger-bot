@@ -52,9 +52,10 @@ def message(payload):
     
     if text and text.lower().startswith("ranger"):
         if channel_id not in reports_sent:
-            if event["ts"] not in reports_sent[channel_id][user_id]:
+            if reports_sent.get(channel_id) and event["ts"] in reports_sent[channel_id][user_id]:
+                pass
+            else:
                 post(channel_id, "Fetching your AWS report...")
-                reports_sent[channel_id] = {}
                 if text.lower() == "ranger init":
                     report = Ranger.ranger(init=True, region="eu-west-1", table=True, execute=False)
                     post_file(channel_id, "report_output.txt")
