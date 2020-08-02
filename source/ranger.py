@@ -546,7 +546,7 @@ Cost for {}: {}
 Cost for {}: {}
 """.format(lastdate, lastbill, currentdate, currentbill)
     with open('report_output.txt', 'w') as w:
-        w.write(str(x))
+        w.write(REPORT_OUTPUT)
     return
 
 
