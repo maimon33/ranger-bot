@@ -53,7 +53,7 @@ def message(payload):
     if text and text.lower().startswith("ranger"):
         if channel not in reports_sent:
             post(channel_id, "Fetching your AWS report...")
-            reports_sent[channel] = {}
+            reports_sent[channel_id] = {}
             if text.lower() == "ranger init":
                 report = Ranger.ranger(init=True, region="eu-west-1", table=True, execute=False)
                 post_file(channel_id, "report_output.txt")
@@ -62,7 +62,7 @@ def message(payload):
                 post_file(channel_id, "report_output.txt")
             else:
                 post(channel_id, "Command not found")
-        reports_sent[channel][user_id] = report
+        reports_sent[channel_id][user_id] = report
     return
 
 
