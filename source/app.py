@@ -48,11 +48,13 @@ def message(payload):
     channel_id = event.get("channel")
     user_id = event.get("user")
     text = event.get("text")
+    ts = event.get("ts")
+    uniq_id = "{}-{}".format(channel_id, user_id)
 
     
     if text and text.lower().startswith("ranger"):
         try:
-            if event["ts"] not in reports_sent[channel_id][user_id]:
+            if ts not in reports_sent[uniq_id]:
                 post(channel_id, "Fetching your AWS report...")
                 if text.lower() == "ranger init":
                     report = Ranger.ranger(init=True, region="eu-west-1", table=True, execute=False)
@@ -62,9 +64,8 @@ def message(payload):
                     post_file(channel_id, "report_output.txt")
                 else:
                     post(channel_id, "Command not found")
-                reports_sent[channel_id][user_id] = event["ts"]
+                reports_sent[uniq_id] = ts
         except KeyError:
-            reports_sent[channel_id] = {}
             post(channel_id, "Fetching your AWS report...")
             if text.lower() == "ranger init":
                 report = Ranger.ranger(init=True, region="eu-west-1", table=True, execute=False)
@@ -74,8 +75,7 @@ def message(payload):
                 post_file(channel_id, "report_output.txt")
             else:
                 post(channel_id, "Command not found")
-            reports_sent[channel_id][user_id] = event["ts"]
-                
+            reports_sent[uniq_id] = ts              
     return
 
 
