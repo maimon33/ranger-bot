@@ -52,6 +52,7 @@ def message(payload):
     
     if text and text.lower().startswith("ranger"):
         if channel_id not in reports_sent:
+            print(reports_sent)
             if reports_sent.get(channel_id) and event["ts"] in reports_sent[channel_id][user_id]:
                 pass
             else:
