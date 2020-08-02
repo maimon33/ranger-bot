@@ -45,8 +45,6 @@ def message(payload):
     """
     event = payload.get("event", {})
 
-    print(dir(event))
-    print(event)
     channel_id = event.get("channel")
     user_id = event.get("user")
     text = event.get("text")
@@ -54,17 +52,18 @@ def message(payload):
     
     if text and text.lower().startswith("ranger"):
         if channel_id not in reports_sent:
-            post(channel_id, "Fetching your AWS report...")
-            reports_sent[channel_id] = {}
-            if text.lower() == "ranger init":
-                report = Ranger.ranger(init=True, region="eu-west-1", table=True, execute=False)
-                post_file(channel_id, "report_output.txt")
-            elif text.lower() == "ranger bill":
-                report = Ranger.bill()
-                post_file(channel_id, "report_output.txt")
-            else:
-                post(channel_id, "Command not found")
-            reports_sent[channel_id][user_id] = report
+            if event["ts"] not in reports_sent[channel_id][user_id]:
+                post(channel_id, "Fetching your AWS report...")
+                reports_sent[channel_id] = {}
+                if text.lower() == "ranger init":
+                    report = Ranger.ranger(init=True, region="eu-west-1", table=True, execute=False)
+                    post_file(channel_id, "report_output.txt")
+                elif text.lower() == "ranger bill":
+                    report = Ranger.bill()
+                    post_file(channel_id, "report_output.txt")
+                else:
+                    post(channel_id, "Command not found")
+                reports_sent[channel_id][user_id] = event["ts"]
     return
 
 
