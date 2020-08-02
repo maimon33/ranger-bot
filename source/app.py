@@ -53,7 +53,7 @@ def message(payload):
         if text.lower() == "ranger init":
             report = Ranger.ranger(init=True, region="eu-west-1", table=True, execute=False)
             post_file(channel_id, "report_output.txt")
-        elif test.lower() == "ranger bill":
+        elif text.lower() == "ranger bill":
             report = Ranger.bill()
             post_file(channel_id, "report_output.txt")
         else:
