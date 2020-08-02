@@ -442,30 +442,6 @@ class AWSRanger(object):
             pass
 
 
-# CLICK_CONTEXT_SETTINGS = dict(
-#     help_option_names=['-h', '--help'],
-#     token_normalize_func=lambda param: param.lower(),
-#     ignore_unknown_options=True)
-
-# @click.group(invoke_without_command=True, 
-#              context_settings=CLICK_CONTEXT_SETTINGS)
-# @click.pass_context   
-# @click.option('--init',
-#               is_flag=True,
-#               help="Config ranger for first use")       
-# @click.option('-r',
-#               '--region',
-#               default="eu-west-1",
-#               help=' Specify the region\n'\
-#                    ' Default to "eu-west-1"')
-# @click.option('-x',
-#               '--execute',
-#               help=' What action to carry out on instances not protected?   \b'
-#                    ' Stop, Start or Terminate ')
-# @click.option('-t',
-#               '--table',
-#               is_flag=True,
-#               help='prints output in table format')
 def ranger(init, region, table, execute):
     """Round up your AWS instances
 
@@ -482,9 +458,9 @@ def ranger(init, region, table, execute):
 
     if init:
         if os.path.exists(AWS_RANGER_HOME):
-            print("ranger Home exists!")
+            pass
         else:
-            print("Creating ranger Home")
+            # print("Creating ranger Home")
             os.makedirs(AWS_RANGER_HOME)
     
     validate_ranger(AWS_RANGER_HOME)
@@ -508,7 +484,7 @@ def ranger(init, region, table, execute):
         ranger.executioner(instances, action=execute)
     
     if table:
-        print("Summery for Account ID: {}".format(account))
+        # print("Summery for Account ID: {}".format(account))
         x = PrettyTable()
         x.field_names = ["AWS Region", "# of instances"]
         if all_regions:
@@ -520,10 +496,12 @@ def ranger(init, region, table, execute):
                 x.add_row([ranger.convert_region_name(region), len(instances[region])])
             else:
                 print("Region has no instance")
-        print(x)
+        # return x
+        with open('demofile2.txt', 'w') as w:
+            w.write(str(x))
+        return
     else:
         print(utils._format_json(instances))
 
 if __name__ == "__main__":
-    print("Hi")
     ranger()
