@@ -45,13 +45,15 @@ def message(payload):
     """
     event = payload.get("event", {})
 
+    print(dir(event))
+    print(event)
     channel_id = event.get("channel")
     user_id = event.get("user")
     text = event.get("text")
 
     
     if text and text.lower().startswith("ranger"):
-        if channel_id not in reports_sent:
+        if channel_id not in reports_sent[channel_id]:
             post(channel_id, "Fetching your AWS report...")
             reports_sent[channel_id] = {}
             if text.lower() == "ranger init":
@@ -62,7 +64,7 @@ def message(payload):
                 post_file(channel_id, "report_output.txt")
             else:
                 post(channel_id, "Command not found")
-        reports_sent[channel_id][user_id] = report
+            reports_sent[channel_id][user_id] = report
     return
 
 
