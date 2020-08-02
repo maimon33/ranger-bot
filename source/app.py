@@ -14,6 +14,8 @@ slack_events_adapter = SlackEventAdapter(os.environ["SLACK_SIGNING_SECRET"], "/s
 # Initialize a Web API client
 slack_web_client = WebClient(token=os.environ['SLACK_BOT_TOKEN'])
 
+reports_sent = {}
+
 def post(channel, text):
     try:
       response = slack_web_client.chat_postMessage(
@@ -49,17 +51,18 @@ def message(payload):
 
     
     if text and text.lower().startswith("ranger"):
-        post(channel_id, "Fetching your AWS report...")
-        if text.lower() == "ranger init":
-            report = Ranger.ranger(init=True, region="eu-west-1", table=True, execute=False)
-            post_file(channel_id, "report_output.txt")
-        elif text.lower() == "ranger bill":
-            report = Ranger.bill()
-            post_file(channel_id, "report_output.txt")
-        else:
-            post(channel_id, "Command not found")
-        pass
-
+        if channel not in reports_sent:
+            post(channel_id, "Fetching your AWS report...")
+            reports_sent[channel] = {}
+            if text.lower() == "ranger init":
+                report = Ranger.ranger(init=True, region="eu-west-1", table=True, execute=False)
+                post_file(channel_id, "report_output.txt")
+            elif text.lower() == "ranger bill":
+                report = Ranger.bill()
+                post_file(channel_id, "report_output.txt")
+            else:
+                post(channel_id, "Command not found")
+        reports_sent[channel][user_id] = report
     return
 
 

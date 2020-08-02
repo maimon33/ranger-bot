@@ -542,8 +542,8 @@ def bill():
     lastdate, lastbill = run_func_in_threads(thread_func=ranger.get_bill_by_month, list_of_args=[False])
     currentdate, currentbill = run_func_in_threads(thread_func=ranger.get_bill_by_month,  list_of_args=[True])
     REPORT_OUTPUT="""
-Cost for {}: {}
-Cost for {}: {}
+Cost for previous month ({}): {}
+Cost for current month ({}): {}
 """.format(lastdate, lastbill, currentdate, currentbill)
     with open('report_output.txt', 'w') as w:
         w.write(REPORT_OUTPUT)
